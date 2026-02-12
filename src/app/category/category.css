@@ -1,0 +1,16 @@
+form{
+    margin-bottom: 1rem;
+}
+
+table{
+    text-align: center;
+}
+
+table a{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.form-control{
+    width: 100%;
+}

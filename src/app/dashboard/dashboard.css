@@ -1,0 +1,12 @@
+.button-group   {
+    display: block;
+    margin-top: 1rem;  
+}
+
+button {
+    margin-right: 0.5rem;
+}
+
+.card {
+  margin-top: 1.5rem;
+}

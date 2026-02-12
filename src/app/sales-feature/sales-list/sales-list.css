@@ -1,0 +1,54 @@
+.order-container{
+    width: 100%;
+}   
+
+a{
+    text-decoration: none;
+}
+
+.product-content{
+    width: 100%;
+}
+
+.table{
+    text-align: center;
+    width: 100%;
+
+}
+
+.modal-table td{
+    width: 50%;      
+}
+
+.modal-table th{
+    
+    width: 50%;   
+}
+
+.modal-table tr{
+    border-bottom: 1px solid #dddddd82;
+    /* display: flex; */
+}
+
+.btn-success, .btn-warning{
+    padding: 0.1rem 1rem;
+    width: 4.5rem;
+}
+
+
+.list-group-item span{
+    display: flex;
+    justify-content: right;
+}
+
+.list-group-item input{
+    width:5rem;
+    border-radius: 5px 0 0 5px;
+}
+
+.list-group-item select{
+    width: 4rem;
+    border-radius: 0 5px 5px 0;
+
+
+}

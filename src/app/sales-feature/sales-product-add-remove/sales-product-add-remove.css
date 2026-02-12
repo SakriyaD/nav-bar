@@ -1,0 +1,37 @@
+
+
+.sales-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;            /* small space between inputs and buttons */
+    margin-bottom: 1rem;
+}
+
+/* container for all input/select fields */
+.line-fields {
+    flex: 1;                /* take all remaining width */
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* each input/select gets equal width */
+.line-fields .field {
+    flex: 1;
+}
+
+/* small actions column on the right */
+.line-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.1rem;
+}
+
+/* make +/- buttons compact */
+.line-actions .btn {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+    height: 1.4rem;
+    width: 1.4rem;
+}

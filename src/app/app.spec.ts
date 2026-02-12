@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing'; // ADD THIS IMPORT
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App],
+      imports: [App, RouterTestingModule], // ADD RouterTestingModule HERE
     }).compileComponents();
   });
 
@@ -18,6 +19,7 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, nav-bar');
+    // CORRECTED: Look for h2 with 'Navbar'
+    expect(compiled.querySelector('h2')?.textContent).toContain('Navbar');
   });
 });

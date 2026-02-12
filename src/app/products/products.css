@@ -1,0 +1,25 @@
+.product-container{
+    margin-top: 1rem;
+}
+
+.product-content{
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.action{
+    display: flex;
+    justify-content: right;
+    margin-bottom: 1rem;
+}
+
+table{
+    text-align: center;
+}
+
+.table a{
+    text-decoration: none;
+}
+
