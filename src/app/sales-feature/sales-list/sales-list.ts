@@ -367,7 +367,7 @@ export class SalesList implements OnInit {
       return;
     }
 
-    // Filter against multiple fields to make order lookup easier.
+    // Linear (sequential) search with substring matching across multiple fields.
     this.filteredSales = this.sales.filter((sale) => {
       const productNames = sale.lines.map((line) => line.productName).join(' ').toLowerCase();
       const formattedDate = new Date(sale.date).toLocaleDateString().toLowerCase();

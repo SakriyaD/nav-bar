@@ -208,6 +208,7 @@ export class Products implements AfterViewInit {
       return this.productList;
     }
 
+    // Linear (sequential) search with substring matching using filter + includes.
     return this.productList.filter((product) =>
       product.name.toLowerCase().includes(query) ||
       product.category.toLowerCase().includes(query) ||
