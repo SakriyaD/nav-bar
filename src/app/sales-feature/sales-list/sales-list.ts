@@ -1,15 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { SalesNavigation } from '../sales-navigation/sales-navigation';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { CdkTrapFocus } from '@angular/cdk/a11y';  
-import { RouterOutlet } from '@angular/router';
-import { SalesService, Sale, ReceiptVoucher } from '../../sales-service';
+import { SalesService, Sale } from '../../sales-service';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-sales-list',
-  standalone: true,
-  imports: [SalesNavigation, CommonModule, FormsModule, CdkTrapFocus, RouterOutlet],
+  imports: [SalesNavigation, CommonModule, CdkTrapFocus],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="order-container" cdkTrapFocus>
       <h2>Order Lists</h2>
@@ -37,7 +35,8 @@ import { Router } from '@angular/router';
             </tr>
           </thead>
           <tbody class="table-group-divider">
-            <tr *ngFor="let s of filteredSales; let i = index">
+            @for (s of filteredSales; track s.id) {
+            <tr>
               <th scope="row">{{ s.id }}</th>
               <td>{{ s.date | date: 'mediumDate' }}</td>
               <td>{{ s.customerName }}</td>
@@ -61,14 +60,12 @@ import { Router } from '@angular/router';
               <td>
                 <!-- Pay button when unpaid -->
                 @if (s.status === 'unpaid'){
-                  <button 
-                    type="button" 
-                    class="btn btn-success" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="#receiptModal" 
-                    (click)="openReceipt(s); $event.preventDefault()"                
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    (click)="openVoucherPage(s.id)"
                   >
-                  Pay
+                    Pay
                   </button>
                 } 
                 <!-- Undo button when paid -->  
@@ -76,7 +73,7 @@ import { Router } from '@angular/router';
                   <button
                     type="button"
                     class="btn btn-primary me-2"
-                    (click)="viewVoucher(s); $event.preventDefault()"
+                    (click)="openVoucherPage(s.id)"
                   >
                     Voucher
                   </button>
@@ -90,9 +87,12 @@ import { Router } from '@angular/router';
                 }           
               </td>
             </tr>
-            <tr *ngIf="!loading && filteredSales.length === 0">
+            }
+            @if (!loading && filteredSales.length === 0) {
+            <tr>
               <td colspan="8" class="text-center">No matching sales found.</td>
             </tr>
+            }
           </tbody>
         </table>
         <div class="product-content">
@@ -113,8 +113,6 @@ import { Router } from '@angular/router';
         </div>
 
       </div>
-
-      <router-outlet></router-outlet>
 
       <!-- modal for sale details -->
 
@@ -214,105 +212,6 @@ import { Router } from '@angular/router';
           </div>
         </div>
       </div>
-
-      <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div 
-            class="modal-content" 
-            cdkTrapFocus>
-                  
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h5 class="modal-title" id="receiptModalLabel">Payment Receipt</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-                  
-            <!-- Modal Body (Receipt Content) -->
-            <div class="modal-body" >
-              <div class="text-center mb-4" *ngIf="selectedSale">
-                <h2>Thank you for your purchase!</h2>
-                <p><strong>Order ID:</strong> {{ selectedSale.id}}</p>
-              </div>
-
-              <ul class="list-group list-group-flush" *ngIf="selectedSale">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Customer 
-                  <span>{{ selectedSale.customerName }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Product(s)
-                  <span>
-                    @if (selectedSale.lines.length > 0) {
-                      {{ getAllProductNames(selectedSale) }}
-                    } 
-                  </span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Sub total
-                  <span>{{ paymentSubtotal.toFixed(2) }} Rs</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Tax (13%)
-                  <span>{{ paymentTax.toFixed(2) }} Rs</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Net total
-                  <span>{{ selectedSale.netTotal.toFixed(2) }} Rs</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  Discount
-                  <span>
-                    <input
-                    #discountInput
-                    type="number"
-                    class="form-control"
-                    id="discount"
-                    [(ngModel)]="discount"
-                    name="discount"
-                    (ngModelChange)="onDiscountChange($event)"
-                    min="0"
-                  >
-                  <select
-                    class="form-select form-select-sm" aria-label="Small select example"
-                    [(ngModel)]="discountMode"
-                    name="discountMode"
-                    (ngModelChange)="onDiscountModeChange($event)"
-                  >
-                    <option value="percent" selected>%</option>
-                    <option value="amount">Rs</option>
-                  </select>
-                  </span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <strong>Total Amount</strong>
-                  <strong>{{ paymentTotal.toFixed(2) }} Rs</strong>
-                </li>
-              </ul>
-
-              <div class="mt-4" *ngIf="selectedSale">
-                <p><strong>Date:</strong> {{ selectedSale.date | date: 'mediumDate' }}</p>
-              </div>
-
-            </div>
-            
-            <!-- Modal Footer -->
-            <div class="modal-footer">
-              <!-- Pay button when unpaid -->
-              <button 
-                
-                type="button" 
-                class="btn btn-success" 
-                (click)="markAsPaid()"
-                data-bs-dismiss="modal"
-              >
-                Pay
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      </div>
     </div>
     
 
@@ -331,10 +230,6 @@ export class SalesList implements OnInit {
 
 
   products: { id: number; name: string; category: string; rate: number }[] = [];
-
-  //discount info
-  discount= 0;
-  discountMode: 'percent' | 'amount' = 'percent';
 
   //initializes a component’s in-memory sales and products arrays by loading previously persisted data from LocalStorage
   constructor(private salesService: SalesService, private router: Router) {}
@@ -386,25 +281,15 @@ export class SalesList implements OnInit {
   onRemove(sale: Sale) {
     if (confirm(`Are you sure you want to remove order "${sale.id}"?`)) {
       this.salesService.removeSale(sale.id).subscribe({
-        next: () => this.loadSales(),  // Reload after removal
+        next: () => {
+          this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
+          this.loadSales();
+        },  // Reload after removal
         error: (error) => alert(error.message)
       });
     }
   }
 
-  //resets discount field on opening receipt modal
-  openReceipt(sale: Sale) {
-    this.selectedSale = sale;
-
-    // reset discount state for this payment
-    this.discount = 0;
-    this.discountMode = 'percent';
-  }
-
-  //trackBy for ngFor
-  trackById(index: number, item: Sale): number {
-    return item.id;
-  }
   getProductSummary(sale: Sale): string {
     if (!sale.lines || sale.lines.length === 0) {
       return '-';
@@ -433,96 +318,6 @@ export class SalesList implements OnInit {
     return sale.lines.map(line => line.productName).join(', ');
   }
 
-  //base subtotal for payment calculations
-  get paymentSubtotal(): number {
-    return this.selectedSale ? this.selectedSale.subtotal : 0;
-  }
-
-  //the net total stored for the sale (subtotal + tax)
-  get paymentNetTotal(): number {
-    return this.selectedSale ? this.selectedSale.netTotal : 0;
-  }
-
-  //subtotal after applying discount (percent or flat Rs)
-  get discountedNetTotal(): number {
-    const netTotal = this.paymentNetTotal;
-
-    if (this.discountMode === 'percent') { //if % is selected
-      const factor = 1 - this.discount / 100;
-      return Math.max(netTotal * factor, 0);
-    }
-
-    //flat Rs if selected
-    return Math.max(netTotal - this.discount, 0);
-  }
-
-  //tax on discounted net total (13%)
-  get paymentTax(): number {
-    const taxRate = 0.13;
-    return this.paymentSubtotal * taxRate;
-  }
-
-  //final total: discounted net total
-  get paymentTotal(): number {
-    return this.discountedNetTotal;
-  }
-
-  //keep discount in range when user types
-  onDiscountChange(value: string) {
-    const num = Number(value);
-    if (Number.isNaN(num) || num < 0) {
-      this.discount = 0;
-      return;
-    }
-    if (this.discountMode === 'percent' && num > 100) { 
-      this.discount = 100;
-      return;
-    }
-    this.discount = num;
-  }
-
-  onDiscountModeChange(mode: 'percent' | 'amount') {
-    this.discountMode = mode;
-    // re-validate current discount value
-    this.onDiscountChange(String(this.discount));
-  }
-  
-  markAsPaid() {
-    if (!this.selectedSale) {
-      return;
-    }
-
-    this.selectedSale.status = 'paid';
-    //store the discount used for this payment (0 by default if user did nothing)
-    this.selectedSale.discount = this.discount;
-    this.selectedSale.discountMode = this.discountMode;
-    //store the final total after discount for this order
-    this.selectedSale.paidTotal = this.paymentTotal;
-
-    //persist back to localStorage
-    const index = this.sales.findIndex(s => s.id === this.selectedSale!.id);
-    if (index !== -1) {
-      const updatedSale = { ...this.selectedSale };
-      this.sales[index] = updatedSale;
-      this.selectedSale = updatedSale; // Keep selectedSale in sync
-
-      const voucher = this.createVoucher(updatedSale);
-
-      this.salesService.updateSales(this.sales).subscribe({
-        next: () => {
-          this.salesService.saveReceiptVoucher(voucher).subscribe({
-            next: () => {
-              void this.router.navigate(['/sales/voucher', updatedSale.id]);
-            },
-            error: (err) => console.error('Saving voucher failed', err),
-          });
-        },
-        error: (err) => console.error('Saving to local storage failed', err)
-      });
-    }
-
-  }
-
   undoPayment(sale: Sale) {
     sale.status = 'unpaid';
     sale.paidTotal = undefined;
@@ -536,40 +331,16 @@ export class SalesList implements OnInit {
       if (this.selectedSale && this.selectedSale.id === sale.id) {
         this.selectedSale = updatedSale;
       }
-      this.salesService.updateSales(this.sales).subscribe();
-      this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
+      this.salesService.updateSales(this.sales).subscribe({
+        next: () => {
+          this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
+        },
+      });
     }
   }
 
-  viewVoucher(sale: Sale): void {
-    void this.router.navigate(['/sales/voucher', sale.id]);
-  }
-
-  private createVoucher(sale: Sale): ReceiptVoucher {
-    const now = new Date();
-    const voucherNumberSeed = now.toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
-
-    return {
-      voucherNo: `RV-${voucherNumberSeed}-${sale.id}`,
-      saleId: sale.id,
-      date: now.toISOString(),
-      customerName: sale.customerName,
-      address: sale.address,
-      phone: sale.phone,
-      subTotal: sale.subtotal,
-      tax: sale.tax,
-      discount: sale.discount ?? 0,
-      discountMode: sale.discountMode ?? 'percent',
-      totalAmount: sale.paidTotal ?? sale.netTotal,
-      paymentMethod: 'Cash',
-      receivedBy: 'Sales Admin',
-      lines: sale.lines.map((line) => ({
-        productName: line.productName,
-        quantity: line.quantity ?? 0,
-        rate: line.rate ?? 0,
-        amount: line.amount ?? 0,
-      })),
-    };
+  openVoucherPage(saleId: number): void {
+    void this.router.navigate(['/sales/voucher', saleId]);
   }
 
   printPage() {

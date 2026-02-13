@@ -40,6 +40,24 @@
   margin-bottom: 1rem;
 }
 
+.voucher__payment-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.voucher__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.voucher__input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+}
+
 .voucher__table {
   width: 100%;
   border-collapse: collapse;
@@ -79,6 +97,35 @@
   border-radius: 0.375rem;
 }
 
+.voucher__pay-btn {
+  border: 1px solid #198754;
+  background: #198754;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.voucher__pay-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.voucher__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.voucher__back-link {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.voucher__back-link:hover,
+.voucher__back-link:focus-visible {
+  text-decoration: underline;
+}
+
 .voucher__print-btn:focus-visible {
   outline: 3px solid #1d4ed8;
   outline-offset: 2px;
@@ -98,6 +145,12 @@
   }
 
   .voucher__print-btn {
+    display: none;
+  }
+
+  .voucher__pay-btn,
+  .voucher__back-link,
+  .voucher__payment-form {
     display: none;
   }
 }
