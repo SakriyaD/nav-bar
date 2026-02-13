@@ -31,42 +31,44 @@ type RegisteredUser = {
         }
 
         <form #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Email or Username</label>
+          <div class="form-floating mb-3">
             <input 
               #firstFocusableElement
               type="text" 
+              id="login-identifier"
               name="identifier" 
-              class="form-control" 
+              class="form-control"
+              placeholder=" "
               [(ngModel)]="user.identifier" 
               required 
               #identifier="ngModel"
               [class.is-invalid]="identifier.invalid && identifier.touched">
+            <label class="form-label" for="login-identifier">Email or Username</label>
             <div class="invalid-feedback">Please enter your email or username.</div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Password</label>
-            <div class="input-group">
-              <input 
-                [type]="showPassword ? 'text' : 'password'" 
-                name="password" 
-                class="form-control" 
-                [(ngModel)]="user.password" 
-                required 
-                minlength="6"
-                #pwd="ngModel"
-                [class.is-invalid]="pwd.invalid && pwd.touched">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                [attr.aria-pressed]="showPassword"
-              >
-                <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-              </button>
-            </div>
+          <div class="form-floating password-floating mb-3">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="login-password"
+              name="password" 
+              class="form-control pe-5"
+              placeholder=" "
+              [(ngModel)]="user.password" 
+              required 
+              minlength="6"
+              #pwd="ngModel"
+              [class.is-invalid]="pwd.invalid && pwd.touched">
+            <label class="form-label" for="login-password">Password</label>
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
             <div class="invalid-feedback">Password must be at least 6 characters.</div>
           </div>
 

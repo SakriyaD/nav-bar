@@ -9,21 +9,22 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
   template: `
     <div class="product-container" cdkTrapFocus="">
       <h1>Products:</h1>
-      <div class="action">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">Add a product</button>
-      </div>
-      <!-- Search bar added above table header for quick product filtering -->
-      <div class="search-wrapper mb-3">
-        <label for="product-search" class="form-label fw-bold">Search Products</label>
-        <input
-          id="product-search"
-          #productSearchInput
-          type="text"
-          class="form-control"
-          placeholder="Search by id, name, category or rate"
-          [value]="searchTerm"
-          (input)="onSearch(productSearchInput.value)"
-        >
+      <div class="product-toolbar mb-3">
+        <!-- Search bar + add button in one row -->
+        <div class="search-wrapper">
+          <input
+            id="product-search"
+            #productSearchInput
+            type="text"
+            class="form-control"
+            placeholder="Search by id, name, category or rate"
+            [value]="searchTerm"
+            (input)="onSearch(productSearchInput.value)"
+          >
+        </div>
+        <div class="action">
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">+ Add a product</button>
+        </div>
       </div>
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" >
         <div class="modal-dialog">

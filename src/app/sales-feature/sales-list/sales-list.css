@@ -52,3 +52,30 @@ a{
 
 
 }
+
+@media print {
+  /* Hide everything on the body */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the print section and its children */
+  #print-section, #print-section * {
+    visibility: visible;
+  }
+
+  /* Position the print section at the top left of the page */
+  #print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+    .order-container app-sales-navigation{
+        display: block;
+    }
+}
+

@@ -4,8 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CdkTrapFocus } from '@angular/cdk/a11y';  
 import { RouterOutlet } from '@angular/router';
-import { SalesService, Sale } from '../../sales-service';
-import { LocalStorage } from '../../local-storage';
+import { SalesService, Sale, ReceiptVoucher } from '../../sales-service';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-sales-list',
@@ -15,20 +14,13 @@ import { Router } from '@angular/router';
     <div class="order-container" cdkTrapFocus>
       <h2>Order Lists</h2>
 
-      <app-sales-navigation [showSave]="false"></app-sales-navigation>
-      <!-- Search bar added above table header for quick order lookup -->
-      <div class="search-wrapper mb-3">
-        <label for="sales-search" class="form-label fw-bold">Search Orders</label>
-        <input
-          id="sales-search"
-          #salesSearchInput
-          type="text"
-          class="form-control"
-          placeholder="Search by order id, customer, product, date or status"
-          [value]="searchTerm"
-          (input)="onSearch(salesSearchInput.value)"
-        >
-      </div>
+      <app-sales-navigation
+        [showSave]="false"
+        [showSearch]="true"
+        [searchValue]="searchTerm"
+        searchPlaceholder="Search by order id, customer, product, date or status"
+        (searchChange)="onSearch($event)"
+      ></app-sales-navigation>
       <div class="product-content">
        
         <table class="table">
@@ -81,6 +73,13 @@ import { Router } from '@angular/router';
                 } 
                 <!-- Undo button when paid -->  
                 @else  {
+                  <button
+                    type="button"
+                    class="btn btn-primary me-2"
+                    (click)="viewVoucher(s); $event.preventDefault()"
+                  >
+                    Voucher
+                  </button>
                     <button
                       type="button"
                       class="btn btn-warning"
@@ -209,6 +208,7 @@ import { Router } from '@angular/router';
               </ul>
             </div>
             <div class="modal-footer">
+              <button (click)="printPage()">Print Details</button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
@@ -337,7 +337,7 @@ export class SalesList implements OnInit {
   discountMode: 'percent' | 'amount' = 'percent';
 
   //initializes a component’s in-memory sales and products arrays by loading previously persisted data from LocalStorage
-  constructor(private salesService: SalesService, private storage: LocalStorage, private router: Router) {}
+  constructor(private salesService: SalesService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadSales();
@@ -505,7 +505,18 @@ export class SalesList implements OnInit {
       const updatedSale = { ...this.selectedSale };
       this.sales[index] = updatedSale;
       this.selectedSale = updatedSale; // Keep selectedSale in sync
+
+      const voucher = this.createVoucher(updatedSale);
+
       this.salesService.updateSales(this.sales).subscribe({
+        next: () => {
+          this.salesService.saveReceiptVoucher(voucher).subscribe({
+            next: () => {
+              void this.router.navigate(['/sales/voucher', updatedSale.id]);
+            },
+            error: (err) => console.error('Saving voucher failed', err),
+          });
+        },
         error: (err) => console.error('Saving to local storage failed', err)
       });
     }
@@ -525,8 +536,44 @@ export class SalesList implements OnInit {
       if (this.selectedSale && this.selectedSale.id === sale.id) {
         this.selectedSale = updatedSale;
       }
-      this.salesService.updateSales(this.sales).subscribe();   
+      this.salesService.updateSales(this.sales).subscribe();
+      this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
     }
+  }
+
+  viewVoucher(sale: Sale): void {
+    void this.router.navigate(['/sales/voucher', sale.id]);
+  }
+
+  private createVoucher(sale: Sale): ReceiptVoucher {
+    const now = new Date();
+    const voucherNumberSeed = now.toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+
+    return {
+      voucherNo: `RV-${voucherNumberSeed}-${sale.id}`,
+      saleId: sale.id,
+      date: now.toISOString(),
+      customerName: sale.customerName,
+      address: sale.address,
+      phone: sale.phone,
+      subTotal: sale.subtotal,
+      tax: sale.tax,
+      discount: sale.discount ?? 0,
+      discountMode: sale.discountMode ?? 'percent',
+      totalAmount: sale.paidTotal ?? sale.netTotal,
+      paymentMethod: 'Cash',
+      receivedBy: 'Sales Admin',
+      lines: sale.lines.map((line) => ({
+        productName: line.productName,
+        quantity: line.quantity ?? 0,
+        rate: line.rate ?? 0,
+        amount: line.amount ?? 0,
+      })),
+    };
+  }
+
+  printPage() {
+    window.print();
   }
 
 }

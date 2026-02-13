@@ -7,24 +7,25 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-category',
   imports: [ CommonModule, FormsModule, CdkTrapFocus ],
   template: `
-    <div cdkTrapFocus>
+    <div class="category-container" cdkTrapFocus>
       <h1>Category:</h1>
       <form (ngSubmit)='onSubmit()' class="add-category">
-        <div class="mb-3">
-          <label for="category" class="form-label">Add a category</label>
-          <input 
-            #categoryInput
-            type="text" 
-            class="form-control" 
-            id="category" 
-            name="category" 
-            [(ngModel)]="newCategory" 
-            required
-            
-          >
+        <div class="category-toolbar mb-3">
+          <div class="category-input-wrapper">
+            <label for="category" class="form-label">Add a category</label>
+            <input 
+              #categoryInput
+              type="text" 
+              class="form-control" 
+              id="category" 
+              name="category" 
+              [(ngModel)]="newCategory" 
+              required
+              
+            >
+          </div>
+          <button type="submit" class="btn btn-primary">+ Add category</button>
         </div>
-
-        <button type="submit" class="btn btn-primary">Add category</button>
       </form>
       <h2>
         List of categories:  

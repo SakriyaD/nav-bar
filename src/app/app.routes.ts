@@ -10,6 +10,7 @@ import { SalesCustomerDetails } from './sales-feature/sales-customer-details/sal
 import { SalesProductAddRemove } from './sales-feature/sales-product-add-remove/sales-product-add-remove';
 import { SalesTotal } from './sales-feature/sales-total/sales-total';
 import { SalesAdd } from './sales-feature/sales-add/sales-add';
+import { ReceiptVoucherComponent } from './sales-feature/receipt-voucher/receipt-voucher';
 import { LoginPage } from './login-page/login-page';
 import { SignupPage } from './signup-page/signup-page';
 import { AuthGuard } from './auth.guard'; // Import AuthGuard
@@ -34,6 +35,7 @@ export const routes: Routes = [
             { path: 'customer-details', component: SalesCustomerDetails },
             { path: 'product-add-remove', component: SalesProductAddRemove },
             { path: 'total', component: SalesTotal },  
+            { path: 'voucher/:saleId', component: ReceiptVoucherComponent },
         ],
     },
     // 2. The Catch-all safety net

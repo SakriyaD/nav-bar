@@ -21,56 +21,57 @@ type RegisteredUser = {
         <h3 class="fw-bold text-center mb-4">Sign Up</h3>
 
         <form #signupForm="ngForm" (ngSubmit)="onSignup(signupForm)">
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Full Name</label>
-            <input #firstFocusableElement type="text" name="fullName" class="form-control" [(ngModel)]="newUser.name" required #name="ngModel"
+          <div class="form-floating mb-3">
+            <input #firstFocusableElement id="signup-fullname" type="text" name="fullName" class="form-control" [(ngModel)]="newUser.name" required #name="ngModel"
+                  placeholder=" "
                   [class.is-invalid]="name.invalid && name.touched">
+            <label class="form-label" for="signup-fullname">Full Name</label>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Username</label>
-            <input type="text" name="username" class="form-control" [(ngModel)]="newUser.username" required minlength="3" #username="ngModel"
+          <div class="form-floating mb-3">
+            <input id="signup-username" type="text" name="username" class="form-control" [(ngModel)]="newUser.username" required minlength="3" #username="ngModel"
+                  placeholder=" "
                   [class.is-invalid]="username.invalid && username.touched">
+            <label class="form-label" for="signup-username">Username</label>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Email</label>
-            <input type="email" name="email" class="form-control" [(ngModel)]="newUser.email" required email #sEmail="ngModel"
+          <div class="form-floating mb-3">
+            <input id="signup-email" type="email" name="email" class="form-control" [(ngModel)]="newUser.email" required email #sEmail="ngModel"
+                  placeholder=" "
                   [class.is-invalid]="sEmail.invalid && sEmail.touched">
+            <label class="form-label" for="signup-email">Email address</label>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Password</label>
-            <div class="input-group">
-              <input [type]="showPassword ? 'text' : 'password'" name="password" class="form-control" [(ngModel)]="newUser.password" required minlength="6" #sPwd="ngModel"
-                    [class.is-invalid]="sPwd.invalid && sPwd.touched">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="togglePasswordVisibility()"
-                [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-                [attr.aria-pressed]="showPassword"
-              >
-                <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-              </button>
-            </div>
+          <div class="form-floating password-floating mb-3">
+            <input id="signup-password" [type]="showPassword ? 'text' : 'password'" name="password" class="form-control pe-5" [(ngModel)]="newUser.password" required minlength="6" #sPwd="ngModel"
+                  placeholder=" "
+                  [class.is-invalid]="sPwd.invalid && sPwd.touched">
+            <label class="form-label" for="signup-password">Password</label>
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPassword"
+            >
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label small fw-bold">Confirm Password</label>
-            <div class="input-group">
-              <input [type]="showConfirmPassword ? 'text' : 'password'" name="confirmPassword" class="form-control" [(ngModel)]="confirmPassword" required minlength="6" #confirmPwd="ngModel"
-                    [class.is-invalid]="(confirmPwd.invalid && confirmPwd.touched) || (confirmPassword !== '' && confirmPassword !== newUser.password)">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="toggleConfirmPasswordVisibility()"
-                [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
-                [attr.aria-pressed]="showConfirmPassword"
-              >
-              <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
-              </button>
-            </div>
+          <div class="form-floating password-floating mb-3">
+            <input id="signup-confirm-password" [type]="showConfirmPassword ? 'text' : 'password'" name="confirmPassword" class="form-control pe-5" [(ngModel)]="confirmPassword" required minlength="6" #confirmPwd="ngModel"
+                  placeholder=" "
+                  [class.is-invalid]="(confirmPwd.invalid && confirmPwd.touched) || (confirmPassword !== '' && confirmPassword !== newUser.password)">
+            <label class="form-label" for="signup-confirm-password">Confirm Password</label>
+            <button
+              type="button"
+              class="password-toggle"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+              [attr.aria-pressed]="showConfirmPassword"
+            >
+            <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
             @if (confirmPassword !== '' && confirmPassword !== newUser.password) {
               <div class="invalid-feedback d-block">Passwords do not match.</div>
             }

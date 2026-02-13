@@ -1,7 +1,43 @@
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+:host {
+  --field-focus: #006a6a;
+}
+
+.form-floating>.form-control:focus {
+  border-color: var(--field-focus);
+  box-shadow: none;
+}
+
+.form-floating>.form-control.is-invalid {
+  border-color: #dc3545;
+  box-shadow: none;
+  background-image: none;
+}
+
+.password-floating {
+  position: relative;
+}
+
+.password-floating>.form-control {
+  padding-right: 4.6rem;
+}
+
+.password-floating>.form-control.is-invalid {
+  background-image: none;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.65rem;
+  top: 1.35rem;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #6c757d;
+  padding: 0.25rem;
+  z-index: 3;
+}
+
+.password-toggle:focus-visible {
+  outline: 2px solid var(--field-focus);
+  border-radius: 0.35rem;
 }
