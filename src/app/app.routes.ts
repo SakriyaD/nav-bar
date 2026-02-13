@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { Products } from './products/products';
 import { Dashboard } from './dashboard/dashboard';
 import { App } from './app';
-import { Salesman } from './salesman/salesman';
 import { Category } from './category/category';
 import { Sales } from './sales-feature/sales/sales';
 import { SalesList } from './sales-feature/sales-list/sales-list';
@@ -22,7 +21,6 @@ export const routes: Routes = [
     { path: 'signup', component: SignupPage },    
     { path: 'dashboard', component: Dashboard, canActivate: [AuthGuard] },
     { path: 'products', component: Products, canActivate: [AuthGuard] },
-    { path: 'salesman', component: Salesman, canActivate: [AuthGuard] },
     { path: 'category', component: Category, canActivate: [AuthGuard] },
     {
         path: 'sales',

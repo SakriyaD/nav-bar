@@ -66,3 +66,20 @@
   margin-right: 0;
   min-width: 4.5rem;
 }
+
+@media print {
+  /* Hide app shell chrome when printing pages like voucher. */
+  .navbar,
+  .logout-confirm-backdrop,
+  .logout-confirm-dialog {
+    display: none !important;
+  }
+
+  /* Remove top spacing reserved for fixed navbar in print layout. */
+  .outlet-container,
+  .outlet-container.has-navbar-padding {
+    width: 100%;
+    margin: 0;
+    padding-top: 0;
+  }
+}

@@ -35,7 +35,7 @@ import { Router } from '@angular/router';
             </tr>
           </thead>
           <tbody class="table-group-divider">
-            @for (s of filteredSales; track s.id) {
+            @for (s of paginatedSales; track s.id) {
             <tr>
               <th scope="row">{{ s.id }}</th>
               <td>{{ s.date | date: 'mediumDate' }}</td>
@@ -88,13 +88,28 @@ import { Router } from '@angular/router';
               </td>
             </tr>
             }
-            @if (!loading && filteredSales.length === 0) {
+            @if (!loading && paginatedSales.length === 0) {
             <tr>
               <td colspan="8" class="text-center">No matching sales found.</td>
             </tr>
             }
           </tbody>
         </table>
+
+        <nav aria-label="Orders pagination">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">Previous</button>
+            </li>
+            <li class="page-item" *ngFor="let page of pages" [class.active]="page === currentPage">
+              <button class="page-link" (click)="goToPage(page)">{{ page }}</button>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages || totalPages === 0">
+              <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages || totalPages === 0">Next</button>
+            </li>
+          </ul>
+        </nav>
+
         <div class="product-content">
   
           @if (loading) {
@@ -206,7 +221,6 @@ import { Router } from '@angular/router';
               </ul>
             </div>
             <div class="modal-footer">
-              <button (click)="printPage()">Print Details</button>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
           </div>
@@ -221,8 +235,15 @@ import { Router } from '@angular/router';
 export class SalesList implements OnInit {
   sales: Sale[] = [];
   filteredSales: Sale[] = [];
+  paginatedSales: Sale[] = [];
   loading = true;
   searchTerm = '';
+
+  // Pagination state (aligned with products page behavior).
+  itemsPerPage = 10;
+  currentPage = 1;
+  totalPages = 0;
+  pages: number[] = [];
 
   selectedSale: Sale | null = null;
 
@@ -251,7 +272,34 @@ export class SalesList implements OnInit {
   onSearch(value: string): void {
     // Live filter update as user types.
     this.searchTerm = value;
+    this.currentPage = 1;
     this.applySalesFilter();
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+
+    this.currentPage = page;
+    this.updatePagination();
+  }
+
+  private updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredSales.length / this.itemsPerPage) || 0;
+
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+
+    if (this.currentPage < 1 && this.totalPages > 0) {
+      this.currentPage = 1;
+    }
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedSales = this.filteredSales.slice(startIndex, endIndex);
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
   private applySalesFilter(): void {
@@ -259,6 +307,7 @@ export class SalesList implements OnInit {
 
     if (!query) {
       this.filteredSales = [...this.sales];
+      this.updatePagination();
       return;
     }
 
@@ -275,6 +324,8 @@ export class SalesList implements OnInit {
         formattedDate.includes(query)
       );
     });
+
+    this.updatePagination();
   }
 
   //removes a sale from the list after user confirmation
@@ -334,6 +385,7 @@ export class SalesList implements OnInit {
       this.salesService.updateSales(this.sales).subscribe({
         next: () => {
           this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
+          this.applySalesFilter();
         },
       });
     }
@@ -343,8 +395,6 @@ export class SalesList implements OnInit {
     void this.router.navigate(['/sales/voucher', saleId]);
   }
 
-  printPage() {
-    window.print();
-  }
+
 
 }

@@ -27,43 +27,46 @@ import { ReceiptVoucher, Sale, SalesService } from '../../sales-service';
 
         @if (sale()?.status === 'unpaid') {
           <div class="voucher__payment-form" aria-label="Payment details">
-            <div class="voucher__field">
-              <label for="discount">Discount</label>
-              <input
-                id="discount"
-                type="number"
-                min="0"
-                class="voucher__input"
-                [value]="discount()"
-                (input)="updateDiscount(discountInput.value)"
-                #discountInput
-              >
-            </div>
-
-            <div class="voucher__field">
-              <label for="discountMode">Discount Type</label>
-              <select
-                id="discountMode"
-                class="voucher__input"
-                [value]="discountMode()"
-                (change)="updateDiscountMode($any(discountModeSelect.value))"
-                #discountModeSelect
-              >
-                <option value="percent">%</option>
-                <option value="amount">Rs</option>
-              </select>
+            <div class="voucher__field voucher__field--discount">
+              <label id="discount-label" for="discount">Discount</label>
+              <div class="voucher__discount-container">
+                <div class="voucher__discount-group" role="group" aria-labelledby="discount-label">
+                <input
+                  id="discount"
+                  type="number"
+                  min="0"
+                  class="voucher__input voucher__discount-input"
+                  [value]="discount()"
+                  (input)="updateDiscount(discountInput.value)"
+                  #discountInput
+                >
+                <select
+                  id="discountMode"
+                  class="voucher__input voucher__discount-mode"
+                  [value]="discountMode()"
+                  (change)="updateDiscountMode($any(discountModeSelect.value))"
+                  #discountModeSelect
+                >
+                  <option value="percent">%</option>
+                  <option value="amount">Rs</option>
+                </select>
+                </div>
+              </div>
             </div>
 
             <div class="voucher__field">
               <label for="paymentMethod">Payment Method</label>
-              <input
+              <select
                 id="paymentMethod"
-                type="text"
                 class="voucher__input"
                 [value]="paymentMethod()"
-                (input)="paymentMethod.set(paymentMethodInput.value)"
-                #paymentMethodInput
+                (change)="updatePaymentMethod(paymentMethodSelect.value)"
+                #paymentMethodSelect
               >
+                <option value="Cash">Cash</option>
+                <option value="Card">Card</option>
+                <option value="eSewa">eSewa</option>
+              </select>
             </div>
 
             <div class="voucher__field">
@@ -73,8 +76,8 @@ import { ReceiptVoucher, Sale, SalesService } from '../../sales-service';
                 type="text"
                 class="voucher__input"
                 [value]="receivedBy()"
-                (input)="receivedBy.set(receivedByInput.value)"
-                #receivedByInput
+                disabled
+                aria-disabled="true"
               >
             </div>
           </div>
@@ -151,8 +154,8 @@ export class ReceiptVoucherComponent implements OnInit {
 
   discount = signal(0);
   discountMode = signal<'percent' | 'amount'>('percent');
-  paymentMethod = signal('Cash');
-  receivedBy = signal('Sales Admin');
+  paymentMethod = signal<'Cash' | 'Card' | 'eSewa'>('Cash');
+  receivedBy = signal('NavCafe');
 
   private sales: Sale[] = [];
 
@@ -218,9 +221,15 @@ export class ReceiptVoucherComponent implements OnInit {
 
       this.salesService.getReceiptVoucherBySaleId(saleId).subscribe((voucher) => {
         this.voucher.set(voucher);
+        this.paymentMethod.set(this.normalizePaymentMethod(voucher?.paymentMethod));
+        this.receivedBy.set('NavCafe');
         this.loading.set(false);
       });
     });
+  }
+
+  updatePaymentMethod(value: string): void {
+    this.paymentMethod.set(this.normalizePaymentMethod(value));
   }
 
   updateDiscount(value: string): void {
@@ -305,7 +314,7 @@ export class ReceiptVoucherComponent implements OnInit {
       discountMode: overrides.discountMode ?? sale.discountMode ?? 'percent',
       totalAmount: overrides.totalAmount ?? sale.paidTotal ?? sale.netTotal,
       paymentMethod: overrides.paymentMethod ?? 'Cash',
-      receivedBy: overrides.receivedBy ?? 'Sales Admin',
+      receivedBy: overrides.receivedBy ?? 'NavCafe',
       lines: sale.lines.map((line) => ({
         productName: line.productName,
         quantity: line.quantity ?? 0,
@@ -317,5 +326,13 @@ export class ReceiptVoucherComponent implements OnInit {
 
   printVoucher(): void {
     window.print();
+  }
+
+  private normalizePaymentMethod(value: string | undefined): 'Cash' | 'Card' | 'eSewa' {
+    if (value === 'Card' || value === 'eSewa') {
+      return value;
+    }
+
+    return 'Cash';
   }
 }

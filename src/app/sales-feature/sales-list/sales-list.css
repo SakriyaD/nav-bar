@@ -30,9 +30,11 @@ a{
     /* display: flex; */
 }
 
-.btn-success, .btn-warning{
+.btn-success,
+.btn-primary,
+.btn-warning {
     padding: 0.1rem 1rem;
-    width: 4.5rem;
+    width: 5.5rem;
 }
 
 
@@ -78,4 +80,5 @@ a{
         display: block;
     }
 }
+
 
