@@ -31,18 +31,22 @@ import { ThemeService } from '../../../theme.service';
 export class RevenueChart {
   readonly data = input.required<RevenueByDay[]>();
 
+  // Inject shared theme service so the chart re-renders immediately on toggle
   private readonly themeService = inject(ThemeService);
 
+  // Map raw data to ApexCharts series format
   readonly series = computed<ApexAxisChartSeries>(() => [{
     name: 'Revenue',
     data: this.data().map(d => d.revenue),
   }]);
 
+  // Map raw data to x-axis date labels
   readonly xAxis = computed<ApexXAxis>(() => ({
     categories: this.data().map(d => d.date),
     labels: { rotate: 0, style: { fontSize: '11px' } },
   }));
 
+  // Reads the theme signal — recomputes automatically when theme changes
   readonly apexTheme = computed<ApexTheme>(() => ({
     mode: this.themeService.currentTheme(),
   }));

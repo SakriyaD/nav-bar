@@ -28,6 +28,7 @@ export interface ProductStat {
 export class DashboardService {
   private readonly salesService = inject(SalesService);
 
+  // Computes the four top-level KPI numbers shown in the stat cards.
   getStats(): Observable<DashboardStats> {
     return this.salesService.getSales().pipe(
       map(sales => ({
@@ -39,12 +40,15 @@ export class DashboardService {
     );
   }
 
+  // Builds a day-by-day revenue array for the last `days` days.
+  // Pre-fills missing days with 0 so the line chart has no gaps.
   getRevenueByDay(days = 7): Observable<RevenueByDay[]> {
     return this.salesService.getSales().pipe(
       map(sales => {
         const result: Record<string, number> = {};
         const today = new Date();
 
+        // Initialise every day in the window to 0
         for (let i = days - 1; i >= 0; i--) {
           const d = new Date(today);
           d.setDate(today.getDate() - i);
@@ -52,6 +56,7 @@ export class DashboardService {
           result[key] = 0;
         }
 
+        // Accumulate revenue from sales that fall within the window
         for (const sale of sales) {
           const key = new Date(sale.date).toLocaleDateString('en-CA');
           if (key in result) {
@@ -64,6 +69,8 @@ export class DashboardService {
     );
   }
 
+  // Sums revenue per category across all sale lines, sorted highest first.
+  // Used by the donut chart.
   getRevenueByCategory(): Observable<CategoryStat[]> {
     return this.salesService.getSales().pipe(
       map(sales => {
@@ -81,6 +88,8 @@ export class DashboardService {
     );
   }
 
+  // Aggregates total quantity sold per product and returns the top `limit` results.
+  // Used by the horizontal bar chart.
   getTopProducts(limit = 5): Observable<ProductStat[]> {
     return this.salesService.getSales().pipe(
       map(sales => {

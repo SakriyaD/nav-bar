@@ -16,12 +16,17 @@ import { TopProductsChart } from './components/top-products-chart/top-products-c
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
 
+  // Signals holding the latest data for each chart/card.
+  // Initialised to safe empty defaults to avoid template null checks.
   readonly stats = signal<DashboardStats>({ totalOrders: 0, totalRevenue: 0, paidOrders: 0, unpaidOrders: 0 });
   readonly revenueByDay = signal<RevenueByDay[]>([]);
   readonly categoryStats = signal<CategoryStat[]>([]);
   readonly topProducts = signal<ProductStat[]>([]);
 
   ngOnInit(): void {
+    // Fetch all aggregated data once on mount and push into signals.
+    // SalesService returns synchronous observables (localStorage),
+    // so there is no loading spinner needed.
     this.dashboardService.getStats().subscribe(s => this.stats.set(s));
     this.dashboardService.getRevenueByDay().subscribe(d => this.revenueByDay.set(d));
     this.dashboardService.getRevenueByCategory().subscribe(c => this.categoryStats.set(c));

@@ -34,17 +34,21 @@ import { ThemeService } from '../../../theme.service';
 export class TopProductsChart {
   readonly data = input.required<ProductStat[]>();
 
+  // Inject shared theme service so the chart re-renders immediately on toggle
   private readonly themeService = inject(ThemeService);
 
+  // Map product quantities into the bar series
   readonly series = computed<ApexAxisChartSeries>(() => [{
     name: 'Qty Sold',
     data: this.data().map(d => d.quantity),
   }]);
 
+  // Product names become the y-axis labels (horizontal bar layout)
   readonly xAxis = computed<ApexXAxis>(() => ({
     categories: this.data().map(d => d.productName),
   }));
 
+  // Reads the theme signal — recomputes automatically when theme changes
   readonly apexTheme = computed<ApexTheme>(() => ({
     mode: this.themeService.currentTheme(),
   }));

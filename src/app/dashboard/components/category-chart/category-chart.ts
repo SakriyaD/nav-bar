@@ -30,11 +30,14 @@ import { ThemeService } from '../../../theme.service';
 export class CategoryChart {
   readonly data = input.required<CategoryStat[]>();
 
+  // Inject shared theme service so the chart re-renders immediately on toggle
   private readonly themeService = inject(ThemeService);
 
+  // Revenue totals and category names fed directly into the donut slices
   readonly series = computed<ApexNonAxisChartSeries>(() => this.data().map(d => d.total));
   readonly labels = computed<string[]>(() => this.data().map(d => d.category));
 
+  // Reads the theme signal — recomputes automatically when theme changes
   readonly apexTheme = computed<ApexTheme>(() => ({
     mode: this.themeService.currentTheme(),
   }));

@@ -23,10 +23,11 @@ export class Navbar implements OnInit {
   readonly isSignupPage = signal(false);
   readonly showLogoutConfirm = signal(false);
 
-  // Expose theme signal from service for the template
+  // Alias the service signal so the template can read currentTheme() directly
   readonly currentTheme = this.themeService.currentTheme;
 
   constructor() {
+    // Track route changes to hide the navbar on login/signup pages
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
@@ -36,6 +37,7 @@ export class Navbar implements OnInit {
   }
 
   ngOnInit(): void {
+    // Restore theme from localStorage (or detect OS preference)
     this.themeService.loadSavedTheme();
   }
 
@@ -64,6 +66,8 @@ export class Navbar implements OnInit {
     this.showLogoutConfirm.set(false);
   }
 
+  // Delegates to ThemeService — updates the shared signal, which
+  // causes all chart components to re-render with the new mode.
   toggleTheme(): void {
     const newTheme = this.currentTheme() === 'light' ? 'dark' : 'light';
     this.themeService.applyTheme(newTheme);
