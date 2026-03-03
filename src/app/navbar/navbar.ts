@@ -4,6 +4,7 @@ import { filter } from 'rxjs/operators';
 import { AuthService } from '../auth.service';
 import { RoleService } from '../role.service';
 import { TrapFocusDirective } from '../trap-focus.directive';
+import { ThemeService } from '../theme.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,11 +17,14 @@ export class Navbar implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly roleService = inject(RoleService);
   private readonly router = inject(Router);
+  readonly themeService = inject(ThemeService);
 
   readonly isLoginPage = signal(false);
   readonly isSignupPage = signal(false);
   readonly showLogoutConfirm = signal(false);
-  readonly currentTheme = signal<'light' | 'dark'>('light');
+
+  // Expose theme signal from service for the template
+  readonly currentTheme = this.themeService.currentTheme;
 
   constructor() {
     this.router.events.pipe(
@@ -32,13 +36,7 @@ export class Navbar implements OnInit {
   }
 
   ngOnInit(): void {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    if (savedTheme) {
-      this.setTheme(savedTheme);
-    } else {
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.setTheme(systemPrefersDark ? 'dark' : 'light');
-    }
+    this.themeService.loadSavedTheme();
   }
 
   get isLoggedIn(): boolean {
@@ -68,12 +66,6 @@ export class Navbar implements OnInit {
 
   toggleTheme(): void {
     const newTheme = this.currentTheme() === 'light' ? 'dark' : 'light';
-    this.setTheme(newTheme);
-  }
-
-  private setTheme(theme: 'light' | 'dark'): void {
-    this.currentTheme.set(theme);
-    document.documentElement.setAttribute('data-bs-theme', theme);
-    localStorage.setItem('theme', theme);
+    this.themeService.applyTheme(newTheme);
   }
 }
