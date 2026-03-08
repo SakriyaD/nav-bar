@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { SalesNavigation } from '../sales-navigation/sales-navigation';
 import { CommonModule } from '@angular/common';
 import { CdkTrapFocus } from '@angular/cdk/a11y';  
 import { SalesService, Sale } from '../../sales-service';
 import { Router } from '@angular/router';
+import { ToastService } from '../../toast/toast.service';
 @Component({
   selector: 'app-sales-list',
   imports: [SalesNavigation, CommonModule, CdkTrapFocus],
@@ -43,11 +44,17 @@ import { Router } from '@angular/router';
               <td>{{ getProductSummary(s) }}</td>
               <td>{{ (s.paidTotal ?? s.netTotal).toFixed(2) }}</td>
               <td>
-                <a href="" data-bs-toggle="modal" data-bs-target="#salelistmodal" (click)="selectedSale = s; $event.preventDefault()">
-                  Details
-                </a> 
-                / 
-                <a href="" (click)="onRemove(s); $event.preventDefault()" >Remove</a>
+                @if (pendingDeleteSaleId() === s.id) {
+                  <span class="text-danger fw-semibold me-1">Remove order #{{s.id}}?</span>
+                  <a href="" (click)="confirmRemove(s); $event.preventDefault()" class="text-danger fw-bold me-2">Yes</a>
+                  <a href="" (click)="cancelRemove(); $event.preventDefault()">No</a>
+                } @else {
+                  <a href="" data-bs-toggle="modal" data-bs-target="#salelistmodal" (click)="selectedSale = s; $event.preventDefault()">
+                    Details
+                  </a> 
+                  / 
+                  <a href="" (click)="onRemove(s); $event.preventDefault()">Remove</a>
+                }
               </td>
               <td>
                 <span
@@ -253,7 +260,10 @@ export class SalesList implements OnInit {
   products: { id: number; name: string; category: string; rate: number }[] = [];
 
   //initializes a component’s in-memory sales and products arrays by loading previously persisted data from LocalStorage
-  constructor(private salesService: SalesService, private router: Router) {}
+  private readonly salesService = inject(SalesService);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
+  readonly pendingDeleteSaleId = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadSales();
@@ -328,17 +338,24 @@ export class SalesList implements OnInit {
     this.updatePagination();
   }
 
-  //removes a sale from the list after user confirmation
-  onRemove(sale: Sale) {
-    if (confirm(`Are you sure you want to remove order "${sale.id}"?`)) {
-      this.salesService.removeSale(sale.id).subscribe({
-        next: () => {
-          this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
-          this.loadSales();
-        },  // Reload after removal
-        error: (error) => alert(error.message)
-      });
-    }
+  onRemove(sale: Sale): void {
+    this.pendingDeleteSaleId.set(sale.id);
+  }
+
+  confirmRemove(sale: Sale): void {
+    this.pendingDeleteSaleId.set(null);
+    this.salesService.removeSale(sale.id).subscribe({
+      next: () => {
+        this.salesService.removeReceiptVoucherBySaleId(sale.id).subscribe();
+        this.toastService.success(`Order #${sale.id} removed successfully.`);
+        this.loadSales();
+      },
+      error: (error) => this.toastService.error(error.message)
+    });
+  }
+
+  cancelRemove(): void {
+    this.pendingDeleteSaleId.set(null);
   }
 
   getProductSummary(sale: Sale): string {

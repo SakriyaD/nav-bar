@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { LocalStorage } from '../local-storage';
 import { RouterLink } from "@angular/router"; 
 import { TrapFocusDirective } from '../trap-focus.directive';
+import { ToastService } from '../toast/toast.service';
 
 type RegisteredUser = {
   name: string;
@@ -105,7 +106,9 @@ export class SignupPage implements AfterViewInit {
   showPassword = false;
   showConfirmPassword = false;
   
-  constructor(private localStorage: LocalStorage) {}
+  private readonly localStorage = inject(LocalStorage);
+  private readonly toastService = inject(ToastService);
+
   ngAfterViewInit(): void {
     this.firstFocusableElement?.nativeElement.focus();
   }
@@ -122,26 +125,24 @@ export class SignupPage implements AfterViewInit {
     if (form.valid) {
       //checks password and confirm password match
       if (this.newUser.password !== this.confirmPassword) {
-        alert('Password and confirm password must match.');
+        this.toastService.error('Password and confirm password must match.');
         return;
       }
 
       const users = this.localStorage.getItem<RegisteredUser[]>('users') || [];
-      // Check if user with this email already exists
       if (users.some((user) => user.email === this.newUser.email)) {
-        alert('User with this email already exists.');
+        this.toastService.error('User with this email already exists.');
         return;
       }
 
-      // Username uniqueness check supports login with username later.
       if (users.some((user) => user.username === this.newUser.username)) {
-        alert('Username already exists. Please choose another username.');
+        this.toastService.error('Username already exists. Please choose another username.');
         return;
       }
 
       users.push(this.newUser);
       this.localStorage.setItem('users', users);
-      console.log('Signup Successful!', this.newUser);
+      this.toastService.success('Account created successfully! You can now log in.');
       this.resetForm(form);
     }
   }

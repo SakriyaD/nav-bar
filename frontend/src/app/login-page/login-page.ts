@@ -1,10 +1,11 @@
-import { Component, AfterViewInit, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { RouterLink, Router } from "@angular/router";
 import { LocalStorage } from '../local-storage';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../auth.service';
 import { TrapFocusDirective } from '../trap-focus.directive';
+import { ToastService } from '../toast/toast.service';
 
 type RegisteredUser = {
   name: string;
@@ -93,11 +94,14 @@ export class LoginPage implements AfterViewInit {
     password: ''
   };
 
-  // UI states for password toggle and 1-second success alert.
+  private readonly localStorage = inject(LocalStorage);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly toastService = inject(ToastService);
+
+  // UI states for password toggle.
   showPassword = false;
   showLoginSuccessAlert = false;
-
-  constructor(private localStorage: LocalStorage, private router: Router, private authService: AuthService) {}
   ngAfterViewInit(): void {
     this.firstFocusableElement?.nativeElement.focus();
   }
@@ -117,21 +121,17 @@ export class LoginPage implements AfterViewInit {
       );
 
       if (!userExists) {
-        alert('You are not registered. Please sign up first.');
+        this.toastService.error('You are not registered. Please sign up first.');
         return;
       }
 
       if (this.authService.login(this.user.identifier, this.user.password)) {
-        console.log('Login Successful!');
-        // Show a transient success alert, then redirect.
-        this.showLoginSuccessAlert = true;
+        this.toastService.success('Logged in successfully!');
         window.setTimeout(() => {
-          this.showLoginSuccessAlert = false;
           this.router.navigate(['/dashboard']);
         }, 1000);
       } else {
-        alert('Invalid password. Please try again.');
-        console.error('Invalid credentials.');
+        this.toastService.error('Invalid password. Please try again.');
       }
     }
   }

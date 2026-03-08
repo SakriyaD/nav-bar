@@ -1,7 +1,8 @@
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, ElementRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ToastService } from '../toast/toast.service';
 
 @Component({
   selector: 'app-category',
@@ -41,7 +42,15 @@ import { FormsModule } from '@angular/forms';
           <tbody class="table-group-divider">
             <tr *ngFor="let c of paginatedCategories">
               <th scope="row">{{c}}</th>
-              <td><a href="" (click)="onRemove(c); $event.preventDefault()">Remove</a></td>
+              <td>
+                @if (pendingDeleteCategory() === c) {
+                  <span class="text-danger fw-semibold me-1">Remove "{{c}}"?</span>
+                  <a href="" (click)="confirmRemove(c); $event.preventDefault()" class="text-danger fw-bold me-2">Yes</a>
+                  <a href="" (click)="cancelRemove(); $event.preventDefault()">No</a>
+                } @else {
+                  <a href="" (click)="onRemove(c); $event.preventDefault()">Remove</a>
+                }
+              </td>
             </tr>
             <tr *ngIf="paginatedCategories.length === 0">
               <td colspan="2" class="text-center">No categories found.</td>
@@ -77,6 +86,9 @@ export class Category implements AfterViewInit {
   ngAfterViewInit() {
     this.categoryInput.nativeElement.focus();
   }
+
+  private readonly toastService = inject(ToastService);
+  readonly pendingDeleteCategory = signal<string | null>(null);
 
   newCategory = '';
 
@@ -146,24 +158,23 @@ export class Category implements AfterViewInit {
     // Keep current page stable and refresh page slice.
     this.updatePagination();
 
-    //this clears the input field
     this.newCategory = '';
-    
-    console.log('Category added');
+    this.toastService.success(`Category "${trimmed}" added successfully.`);
   }
 
-  onRemove(category: string){
-    const confirmed = window.confirm(`Are you sure you want to remove "${category}"?`);
-    if (!confirmed) {
-      return;
-    }  
-    //filters out the selected category and removes the selected category
+  onRemove(category: string): void {
+    this.pendingDeleteCategory.set(category);
+  }
+
+  confirmRemove(category: string): void {
+    this.pendingDeleteCategory.set(null);
     this.categories = this.categories.filter(c => c !== category);
-    //saves the current list of categories
     localStorage.setItem('categories', JSON.stringify(this.categories));
-
     this.updatePagination();
+    this.toastService.success(`Category "${category}" removed successfully.`);
+  }
 
-    console.log('Item removed');
+  cancelRemove(): void {
+    this.pendingDeleteCategory.set(null);
   }
 }

@@ -1,7 +1,8 @@
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ToastService } from '../toast/toast.service';
 
 @Component({
   selector: 'app-products',
@@ -110,9 +111,16 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
               <td>{{p.category}}</td>
               <td>{{p.rate}}</td>
               <td>
-                <a href="" (click)="onEdit(p); $event.preventDefault()" data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a> 
-                / 
-                <a href="" (click)="onRemove(p); $event.preventDefault()" >Remove</a></td>
+                @if (pendingDeleteId() === p.id) {
+                  <span class="text-danger fw-semibold me-1">Remove "{{p.name}}"?</span>
+                  <a href="" (click)="confirmRemove(p); $event.preventDefault()" class="text-danger fw-bold me-2">Yes</a>
+                  <a href="" (click)="cancelRemove(); $event.preventDefault()">No</a>
+                } @else {
+                  <a href="" (click)="onEdit(p); $event.preventDefault()" data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a> 
+                  / 
+                  <a href="" (click)="onRemove(p); $event.preventDefault()">Remove</a>
+                }
+              </td>
             </tr>
             <tr *ngIf="paginatedProducts.length === 0">
               <td colspan="5" class="text-center">No products found.</td>
@@ -174,6 +182,8 @@ export class Products implements AfterViewInit {
   pages: number[] = [];
   paginatedProducts: { id: number; name: string; category: string; rate: number }[] = [];
 
+  private readonly toastService = inject(ToastService);
+  readonly pendingDeleteId = signal<number | null>(null);
   //null = add mode, number = id of product being edited
   editingProductId: number | null = null;
 
@@ -299,23 +309,16 @@ export class Products implements AfterViewInit {
         category: category as string,
         rate: rate as number,
       });
-
-      console.log('item added');
+      this.toastService.success(`"${name}" added successfully.`);
     } else {
 
     //EDIT MODE
     this.productList = this.productList.map(p =>
       p.id === this.editingProductId
-        ? {
-            ...p,
-            name: name as string,
-            category: category as string,
-            rate: rate as number,
-          }
+        ? { ...p, name: name as string, category: category as string, rate: rate as number }
         : p
     );
-
-    console.log('item updated');
+    this.toastService.success('Product updated successfully.');
     }
 
     //this saves the data to the local storage
@@ -329,21 +332,20 @@ export class Products implements AfterViewInit {
     this.editingProductId = null;
   }
 
-  onRemove(product: { id: number; name: string; category: string; rate: number }){
-    //this ask for confirmation
-    const confirmed = confirm(`Are you sure you want to remove "${product.name}"?`);
-    if (!confirmed) {
-      return;
-    }  
+  onRemove(product: { id: number; name: string; category: string; rate: number }): void {
+    this.pendingDeleteId.set(product.id);
+  }
 
-    //removes the selected product
+  confirmRemove(product: { id: number; name: string; category: string; rate: number }): void {
+    this.pendingDeleteId.set(null);
     this.productList = this.productList.filter(p => p.id !== product.id);
-    //saves the current state list of product
     localStorage.setItem('products', JSON.stringify(this.productList));
-
     this.updatePagination();
+    this.toastService.success(`"${product.name}" removed successfully.`);
+  }
 
-    console.log('product removed');
+  cancelRemove(): void {
+    this.pendingDeleteId.set(null);
   }
   
 }
