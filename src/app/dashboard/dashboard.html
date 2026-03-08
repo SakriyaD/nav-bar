@@ -1,0 +1,53 @@
+<main class="dashboard">
+  <header class="dashboard-header">
+    <h1>Dashboard</h1>
+    <div class="quick-nav" role="group" aria-label="Quick navigation">
+      <a routerLink="/products" class="btn btn-sm btn-outline-primary">Products</a>
+      <a routerLink="/category" class="btn btn-sm btn-outline-secondary">Categories</a>
+      <a routerLink="/sales" class="btn btn-sm btn-outline-success">Orders</a>
+      <a routerLink="/sales/add" class="btn btn-sm btn-outline-info">Add Order</a>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <section class="stat-grid" aria-label="Key performance indicators">
+    <app-stat-card
+      label="Total Orders"
+      icon="🛒"
+      color="#6366f1"
+      [value]="stats().totalOrders"
+    />
+    <app-stat-card
+      label="Total Revenue"
+      icon="💰"
+      color="#22c55e"
+      [value]="stats().totalRevenue"
+      [isCurrency]="true"
+    />
+    <app-stat-card
+      label="Paid Orders"
+      icon="✅"
+      color="#3b82f6"
+      [value]="stats().paidOrders"
+    />
+    <app-stat-card
+      label="Unpaid Orders"
+      icon="⏳"
+      color="#f59e0b"
+      [value]="stats().unpaidOrders"
+    />
+  </section>
+
+  <!-- Charts Row -->
+  <section class="charts-grid" aria-label="Sales charts">
+    <div class="chart-full">
+      <app-revenue-chart [data]="revenueByDay()" />
+    </div>
+    <div class="chart-half">
+      <app-category-chart [data]="categoryStats()" />
+    </div>
+    <div class="chart-half">
+      <app-top-products-chart [data]="topProducts()" />
+    </div>
+  </section>
+</main>

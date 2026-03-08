@@ -1,0 +1,76 @@
+@if (!isLoginPage() && !isSignupPage()) {
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+
+      <a class="navbar-brand" routerLink="dashboard"><h2>NavCafe</h2></a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNavDropdown"
+        aria-controls="navbarNavDropdown"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Master
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" routerLink="products">Products</a></li>
+              <li><a class="dropdown-item" routerLink="category">Category</a></li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Transaction
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" routerLink="sales">Orders</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="navbar-actions">
+        <button
+          class="btn btn-outline-secondary me-2"
+          type="button"
+          (click)="toggleTheme()"
+          [attr.aria-label]="currentTheme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        >
+          {{ currentTheme() === 'dark' ? '☀️ Light' : '🌙 Dark' }}
+        </button>
+        @if (isLoggedIn) {
+          <button class="btn btn-outline-danger" type="button" (click)="onLogout()">Logout</button>
+        }
+      </div>
+
+    </div>
+  </nav>
+}
+
+@if (showLogoutConfirm()) {
+  <div class="logout-confirm-backdrop" role="presentation"></div>
+  <div
+    class="logout-confirm-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="logout-confirm-title"
+    aria-describedby="logout-confirm-message"
+    appTrapFocus
+  >
+    <h5 id="logout-confirm-title" class="mb-2">Confirm Logout</h5>
+    <p id="logout-confirm-message" class="mb-3">Are you sure you want to logout?</p>
+    <div class="logout-confirm-actions">
+      <button type="button" class="btn btn-danger" (click)="confirmLogout()">Yes</button>
+      <button type="button" class="btn btn-secondary" (click)="cancelLogout()">No</button>
+    </div>
+  </div>
+}

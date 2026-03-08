@@ -197,15 +197,18 @@ export class ReceiptVoucherComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Get sale ID from route params
     const saleIdParam = this.route.snapshot.paramMap.get('saleId');
     const saleId = Number(saleIdParam);
 
+    // Exit early if invalid or missing sale ID
     if (!saleIdParam || Number.isNaN(saleId)) {
       this.loading.set(false);
       this.voucher.set(null);
       return;
     }
 
+    // Load sales list and find the selected sale
     this.salesService.getSales().subscribe((sales) => {
       this.sales = sales;
       const selectedSale = sales.find((item) => item.id === saleId) ?? null;
@@ -216,9 +219,11 @@ export class ReceiptVoucherComponent implements OnInit {
         return;
       }
 
+      // Apply sale discount and mode
       this.discount.set(selectedSale.discount ?? 0);
       this.discountMode.set(selectedSale.discountMode ?? 'percent');
 
+      // Load receipt voucher and set payment details
       this.salesService.getReceiptVoucherBySaleId(saleId).subscribe((voucher) => {
         this.voucher.set(voucher);
         this.paymentMethod.set(this.normalizePaymentMethod(voucher?.paymentMethod));

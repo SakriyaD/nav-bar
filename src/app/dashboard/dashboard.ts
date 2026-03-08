@@ -1,64 +1,35 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DashboardService, DashboardStats, RevenueByDay, CategoryStat, ProductStat } from './dashboard.service';
+import { StatCard } from './components/stat-card/stat-card';
+import { RevenueChart } from './components/revenue-chart/revenue-chart';
+import { CategoryChart } from './components/category-chart/category-chart';
+import { TopProductsChart } from './components/top-products-chart/top-products-chart';
 
 @Component({
   selector: 'app-dashboard',
-  standalone: true,
-  imports: [RouterLink],
-  template: `
-    <h1>Dashboard:</h1>
-    <div class="button-group" role="group" aria-label="Basic example">
-      <button type="button" class="btn btn-primary" routerLink="/products">Products</button>
-      <button type="button" class="btn btn-secondary" routerLink="/category">Categories</button>
-      <button type="button" class="btn btn-success" routerLink="/sales">Order Lists</button>
-      <button type="button" class="btn btn-info" routerLink="/sales/add">Add Order</button>
-
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary" 
-        (click)="toggleTheme()">
-        
-        {{ currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode' }}
-        
-      </button>
-    </div>
-
-
-  `,
+  imports: [RouterLink, StatCard, RevenueChart, CategoryChart, TopProductsChart],
+  templateUrl: 'dashboard.html',
   styleUrl: './dashboard.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Dashboard {
-  // 1. Keep track of the theme in a variable
-  currentTheme: 'light' | 'dark' = 'light';
+export class Dashboard implements OnInit {
+  private readonly dashboardService = inject(DashboardService);
 
-  ngOnInit() {
-    // 2. Load preference on startup
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-    
-    if (savedTheme) {
-      this.setTheme(savedTheme);
-    } else {
-      // Use system preference if nothing is saved
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      this.setTheme(systemPrefersDark ? 'dark' : 'light');
-    }
+  // Signals holding the latest data for each chart/card.
+  // Initialised to safe empty defaults to avoid template null checks.
+  readonly stats = signal<DashboardStats>({ totalOrders: 0, totalRevenue: 0, paidOrders: 0, unpaidOrders: 0 });
+  readonly revenueByDay = signal<RevenueByDay[]>([]);
+  readonly categoryStats = signal<CategoryStat[]>([]);
+  readonly topProducts = signal<ProductStat[]>([]);
+
+  ngOnInit(): void {
+    // Fetch all aggregated data once on mount and push into signals.
+    // SalesService returns synchronous observables (localStorage),
+    // so there is no loading spinner needed.
+    this.dashboardService.getStats().subscribe(s => this.stats.set(s));
+    this.dashboardService.getRevenueByDay().subscribe(d => this.revenueByDay.set(d));
+    this.dashboardService.getRevenueByCategory().subscribe(c => this.categoryStats.set(c));
+    this.dashboardService.getTopProducts().subscribe(p => this.topProducts.set(p));
   }
-
-  // 3. Toggle logic
-  toggleTheme() {
-    const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-    this.setTheme(newTheme);
-  }
-
-  // 4. Helper to apply changes
-  private setTheme(theme: 'light' | 'dark') {
-    this.currentTheme = theme;
-    
-    // Set the attribute on the <html> tag for Bootstrap
-    document.documentElement.setAttribute('data-bs-theme', theme);
-    
-    // Save to localStorage
-    localStorage.setItem('theme', theme);
-  }
-
 }
