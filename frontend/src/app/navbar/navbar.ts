@@ -5,6 +5,7 @@ import { AuthService } from '../auth.service';
 import { RoleService } from '../role.service';
 import { TrapFocusDirective } from '../trap-focus.directive';
 import { ThemeService } from '../theme.service';
+import { ToastService } from '../toast/toast.service';
 
 @Component({
   selector: 'app-navbar',
@@ -17,6 +18,7 @@ export class Navbar implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly roleService = inject(RoleService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
   readonly themeService = inject(ThemeService);
 
   readonly isLoginPage = signal(false);
@@ -59,6 +61,7 @@ export class Navbar implements OnInit {
 
   confirmLogout(): void {
     this.showLogoutConfirm.set(false);
+    this.toastService.success('You have been logged out.');
     this.authService.logout();
   }
 

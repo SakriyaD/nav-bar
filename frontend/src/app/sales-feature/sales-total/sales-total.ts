@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SalesService } from '../../sales-service';
 import { Router } from '@angular/router';
+import { ToastService } from '../../toast/toast.service';
 
 @Component({
   selector: 'app-sales-total',
   imports: [FormsModule ],
-  standalone: true,
   template: `
       <div class="card mb-3">
         <div class="card-body">
@@ -50,7 +50,9 @@ import { Router } from '@angular/router';
   styleUrl: './sales-total.css',
 })
 export class SalesTotal {
-  constructor(private salesService: SalesService, private router: Router) {}
+  private readonly salesService = inject(SalesService);
+  private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   get subtotal(): number {
     return this.salesService.subtotal;
@@ -86,12 +88,7 @@ export class SalesTotal {
     } = this.salesService;
 
     if (!this.isValid) {
-      console.log('subtotal in onSaveSale', this.subtotal);
-      console.log('customerName in service', this.salesService.customerName);
-      console.log('lines in service', this.salesService.lines);
-      alert(
-        'Please enter at least one product and customer name before saving.'
-      );
+      this.toastService.warning('Please enter at least one product and customer name before saving.');
       return;
     }
 
@@ -106,15 +103,14 @@ export class SalesTotal {
       status: 'unpaid',
     }).subscribe({
       next: () => {
-      alert('Sale saved successfully.');
-      this.salesService.resetCurrentSale();
-      this.router.navigate(['/sales']);
+        this.toastService.success('Sale saved successfully.');
+        this.salesService.resetCurrentSale();
+        this.router.navigate(['/sales']);
       },
-
       // Error handling, when save fails with backend issues
       error: (err) => {
         console.error('Error saving sale:', err);
-        alert('Failed to save sale. Please try again.');
+        this.toastService.error('Failed to save sale. Please try again.');
       }
     });
   }

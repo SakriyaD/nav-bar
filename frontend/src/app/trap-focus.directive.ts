@@ -1,15 +1,15 @@
-import { Directive, ElementRef, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
+import { Directive, ElementRef, AfterViewInit, OnDestroy, inject } from '@angular/core';
 
 @Directive({
   selector: '[appTrapFocus]',
-  standalone: true,
+  host: { '(keydown.tab)': 'onTab($event)' },
 })
 export class TrapFocusDirective implements AfterViewInit, OnDestroy {
   private firstFocusableElement: HTMLElement | null = null;
   private lastFocusableElement: HTMLElement | null = null;
   private observer: MutationObserver | null = null;
 
-  constructor(private el: ElementRef) {}
+  private readonly el = inject(ElementRef);
 
   ngAfterViewInit() {
     this.updateFocusableElements();
@@ -37,11 +37,8 @@ export class TrapFocusDirective implements AfterViewInit, OnDestroy {
     }
   }
 
-  @HostListener('keydown.tab', ['$event'])
-  onTab(event: Event) {
-  let keyboardEvent = event as KeyboardEvent;
+  onTab(event: Event): void {
     if (!this.lastFocusableElement || !this.firstFocusableElement) return;
-
     if (event.target === this.lastFocusableElement) {
       event.preventDefault();
       this.firstFocusableElement.focus();

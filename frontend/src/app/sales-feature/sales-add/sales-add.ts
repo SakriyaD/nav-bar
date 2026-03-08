@@ -7,7 +7,6 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-sales-add',
-  standalone: true,
   imports: [SalesNavigation, SalesCustomerDetails, SalesProductAddRemove, SalesTotal, CdkTrapFocus],
   template: `
     <div cdkTrapFocus>

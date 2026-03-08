@@ -6,7 +6,6 @@ import { SalesAdd } from '../sales-add/sales-add';
 import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-sales',
-  standalone: true,
   imports: [ SalesNavigation, CdkTrapFocus, RouterOutlet ],
   template: `
   <div cdkTrapFocus>

@@ -6,7 +6,6 @@ import { LocalStorage } from '../../local-storage';
 
 @Component({
   selector: 'app-sales-product-add-remove',
-  standalone: true,
   imports: [FormsModule, CommonModule ],
   template: `
 
