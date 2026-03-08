@@ -45,6 +45,7 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-.claude
-.cursor
-.gemini
+# AI Assistants
+.claude/
+.cursor/
+.gemini/
