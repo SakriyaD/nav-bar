@@ -1,0 +1,7 @@
+<div class="whole-wrapper">
+  <app-navbar />
+  <div class="outlet-container" [class.has-navbar-padding]="!isLoginPage && !isSignupPage">
+    <router-outlet />
+  </div>
+</div>
+<app-toast />
